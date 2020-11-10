@@ -18,15 +18,18 @@ const createRow = ([id, { title, author, isbn }]) => `
     </tr>
 `;
 
-async function listAllBooks() {
+function listAllBooks() {
     const url = baseUrl + '/books.json';
-    let response = await fetch(url);
-    let allBooks = await response.json();
-    tableEl.innerHTML = '';
-    Object.entries(allBooks).forEach(book => {
-        let newBook = createRow(book);
-        tableEl.innerHTML += newBook;
-    });
+    fetch(url)
+        .then(res => res.json())
+        .then(allBooks => {
+            console.log(allBooks);
+            tableEl.innerHTML = '';
+            Object.entries(allBooks).forEach(book => {
+                let newBook = createRow(book);
+                tableEl.innerHTML += newBook;
+            });
+        })
 }
 
 listAllBooks();
@@ -39,20 +42,24 @@ const submitBtn = document.querySelector('form button');
 submitBtn.addEventListener('click', submit);
 
 function submit(e) {
-    
     e.preventDefault();
-    console.log(e);
+    const newBook = {
+        title: titleEl.value,
+        author: authorEl.value,
+        isbn: isbnEl.value,
+    }
     const submitUrl = baseUrl + '/books.json';
     fetch(submitUrl, {
-        method: "POST", 
-        body: {
-            title: titleEl.value,
-            author: authorEl.value,
-            isbn: isbnEl.value,
-        }
+        method: "POST",
+        body: JSON.stringify(newBook)
     })
-    .then(res => console.log(res))
-    .catch(err => console.log(err.message));
+        .then(res => res.json())
+        .then(newEntry => createRow(Object.entries(newEntry)[0]))
+        .then(newBook => {
+            console.log(newBook);
+            tableEl.innerHTML += newBook;
+        })
+        .catch(err => console.log(err.message));
 
     titleEl.value = '';
     authorEl.value = '';
