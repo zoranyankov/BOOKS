@@ -5,6 +5,7 @@ const baseUrl = 'https://collections-e1e12.firebaseio.com';
 tableEl.innerHTML = '';
 
 loadBooksBtn.addEventListener('click', listAllBooks);
+// tableEl.addEventListener('click', editBook);
 
 const createRow = ([id, { title, author, isbn }]) => `
     <tr id="${id}">
@@ -37,6 +38,7 @@ listAllBooks();
 const titleEl = document.getElementById('title');
 const authorEl = document.getElementById('author');
 const isbnEl = document.getElementById('isbn');
+
 const submitBtn = document.querySelector('form button');
 
 submitBtn.addEventListener('click', submit);
@@ -54,9 +56,8 @@ function submit(e) {
         body: JSON.stringify(newBook)
     })
         .then(res => res.json())
-        .then(newEntry => createRow(Object.entries(newEntry)[0]))
+        .then(newEntry => createRow([newEntry.name, newBook]))
         .then(newBook => {
-            console.log(newBook);
             tableEl.innerHTML += newBook;
         })
         .catch(err => console.log(err.message));
