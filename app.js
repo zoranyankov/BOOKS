@@ -123,5 +123,3 @@ function editDeleteBook(e) {
         editForm.style.display = 'none';
     }
 }
-
-//more toDO...
