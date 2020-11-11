@@ -103,25 +103,23 @@ function editDeleteBook(e) {
             .then(selectedBook => {
                 [editTitleEl.value, editAuthorEl.value, editIsbnEl.value] = [selectedBook.title, selectedBook.author, selectedBook.isbn];
                 editForm.style.display = 'block';
-                editBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const editedBook = {
-                        title: editTitleEl.value,
-                        author: editAuthorEl.value,
-                        isbn: editIsbnEl.value,
-                    }
-                    fetch(selectedBookUrl, {
-                        method: "PUT",
-                        body: JSON.stringify(editedBook)
-                    })
-                    .then(res => res.json())
-                    .then(editedBook => {
-                        selection.parentElement.parentElement.innerHTML = createRow([currBookId, editedBook]);
-                        editForm.style.display = 'none';
-                })
-                    .catch(err => console.log(err.message))
-                })
             })
             .catch(err => console.log(err.message))
+        editBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const editedBook = {
+                title: editTitleEl.value,
+                author: editAuthorEl.value,
+                isbn: editIsbnEl.value,
+            }
+            fetch(selectedBookUrl, {
+                method: "PUT",
+                body: JSON.stringify(editedBook)
+            })
+                .catch(err => console.log(err.message))
+
+        })
+        selection.parentElement.parentElement.innerHTML = createRow([currBookId, editedBook]);
+        editForm.style.display = 'none';
     }
 }
