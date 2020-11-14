@@ -3,10 +3,16 @@ const loadBooksBtn = document.getElementById('loadBooks');
 const baseUrl = 'https://collections-e1e12.firebaseio.com';
 const submitBtn = document.getElementById('submit-button');
 const editBtn = document.getElementById('edit-button');
+const deleteBtn = document.getElementById('delete-button');
+const addForm = document.querySelector('form.add-form');
 const editForm = document.querySelector('form.edit-form');
+const deleteForm = document.querySelector('form.delete-form');
 const editTitleEl = document.getElementById('edit-title');
 const editAuthorEl = document.getElementById('edit-author');
 const editIsbnEl = document.getElementById('edit-isbn');
+const deleteTitleEl = document.getElementById('delete-title');
+const deleteAuthorEl = document.getElementById('delete-author');
+const deleteIsbnEl = document.getElementById('delete-isbn');
 
 tableEl.innerHTML = '';
 let selectedBookId = '';
@@ -22,10 +28,16 @@ const createRow = ([id, { title, author, isbn }]) => `
         <td class="book-isbn">${isbn}</td>
         <td>
             <button data-key="${id}" class="edit-book" onclick="editBook(event)">Edit</button>
-            <button data-key="${id}" class="delete-book" onclick="deleteBook(event)">Delete</button>
+            <button data-key="${id}" class="delete-book" onclick="showDeleteForm(event)">Delete</button>
         </td>
     </tr>
 `;
+
+function showAddForm(e) {
+    e.preventDefault();
+    editForm.style.display = 'none';
+    addForm.style.display = 'block';
+}
 
 function listAllBooks() {
     const url = baseUrl + '/books.json';
@@ -78,16 +90,38 @@ function editBook(e) {
         .catch(err => console.log(err.message))
 
     editBtn.setAttribute('data-key', currBookId);
+    addForm.style.display = 'none';
     editForm.style.display = 'block';
 
 }
 
-function deleteBook(e) {
+function showDeleteForm(e) {
+    const currBookId = e.target.getAttribute('data-key');
+    const selectedBookUrl = `${baseUrl}/books/${currBookId}.json`;
+
+    fetch(selectedBookUrl)
+        .then(res => res.json())
+        .then(({ title, author, isbn }) => {
+            deleteBtn.setAttribute('data-key', currBookId);
+            addForm.style.display = 'none';
+            deleteForm.style.display = 'block';
+            [deleteTitleEl.value, deleteAuthorEl.value, deleteIsbnEl.value] = [title, author, isbn];
+        })
+        .catch(err => console.log(err.message))
+}
+
+function deleteCurrBook(e) {
+    e.preventDefault();
+
     const currBookId = e.target.getAttribute('data-key');
     const selectedBookUrl = `${baseUrl}/books/${currBookId}.json`;
 
     fetch(selectedBookUrl, { method: "DELETE" })
-        .then(e.target.parentElement.parentElement.remove())
+        .then(() => {
+            deleteForm.style.display = 'none';
+            addForm.style.display = 'block';
+            document.getElementById(`${currBookId}`).remove();
+        })
         .catch(err => console.log(err.message));
 }
 
@@ -109,8 +143,9 @@ function submitEdit(e) {
         .then(res => res.json())
         .then(({ title, author, isbn }) => {
             const bookToUpdate = tableEl.querySelector(`tr[id="${currBookId}"]`);
-            bookToUpdate.innerHTML = createRow([currBookId, {title, author, isbn}]);
+            bookToUpdate.innerHTML = createRow([currBookId, { title, author, isbn }]);
         })
         .catch(err => console.log(err.message))
     editForm.style.display = 'none';
+    addForm.style.display = 'block';
 }
