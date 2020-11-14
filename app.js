@@ -13,6 +13,8 @@ const editIsbnEl = document.getElementById('edit-isbn');
 const deleteTitleEl = document.getElementById('delete-title');
 const deleteAuthorEl = document.getElementById('delete-author');
 const deleteIsbnEl = document.getElementById('delete-isbn');
+const errEl = document.getElementById('error-message');
+const bodyEl = document.getElementsByTagName('body')[0];
 
 tableEl.innerHTML = '';
 let selectedBookId = '';
@@ -35,6 +37,7 @@ const createRow = ([id, { title, author, isbn }]) => `
 
 function showAddForm(e) {
     e.preventDefault();
+    deleteForm.style.display = 'none';
     editForm.style.display = 'none';
     addForm.style.display = 'block';
 }
@@ -50,15 +53,33 @@ function listAllBooks() {
                 tableEl.innerHTML += newBook;
             });
         })
+        .catch(err => eventHandler(err))
+    deleteForm.style.display = 'none';
+    editForm.style.display = 'none';
+    addForm.style.display = 'block';    
 }
 
-listAllBooks();
+// listAllBooks();
 
 function submit(e) {
     e.preventDefault();
     const titleEl = document.getElementById('title');
     const authorEl = document.getElementById('author');
     const isbnEl = document.getElementById('isbn');
+
+    if (titleEl.value.length == 0) {
+        console.log('in error')
+        return eventHandler({ 'message': 'Title must be filled!' });
+    }
+    if (authorEl.value.length == 0) {
+        console.log('in error')
+        return eventHandler({ 'message': 'Author must be filled!' });
+    }
+    if (isbnEl.value.length == 0) {
+        console.log('in error')
+        return eventHandler({ 'message': 'isbn must be filled!' });
+    }
+
     const newBook = {
         title: titleEl.value,
         author: authorEl.value,
@@ -72,7 +93,7 @@ function submit(e) {
         .then(res => res.json())
         .then(newEntry => createRow([newEntry.name, newBook]))
         .then(newBook => tableEl.innerHTML += newBook)
-        .catch(err => console.log(err.message));
+        .catch(err => eventHandler(err));
 
     titleEl.value = '';
     authorEl.value = '';
@@ -87,9 +108,10 @@ function editBook(e) {
     fetch(selectedBookUrl)
         .then(res => res.json())
         .then(({ title, author, isbn }) => [editTitleEl.value, editAuthorEl.value, editIsbnEl.value] = [title, author, isbn])
-        .catch(err => console.log(err.message))
+        .catch(err => eventHandler(err))
 
     editBtn.setAttribute('data-key', currBookId);
+    deleteForm.style.display = 'none';
     addForm.style.display = 'none';
     editForm.style.display = 'block';
 
@@ -103,11 +125,12 @@ function showDeleteForm(e) {
         .then(res => res.json())
         .then(({ title, author, isbn }) => {
             deleteBtn.setAttribute('data-key', currBookId);
+            editForm.style.display = 'none';
             addForm.style.display = 'none';
             deleteForm.style.display = 'block';
             [deleteTitleEl.value, deleteAuthorEl.value, deleteIsbnEl.value] = [title, author, isbn];
         })
-        .catch(err => console.log(err.message))
+        .catch(err => eventHandler(err))
 }
 
 function deleteCurrBook(e) {
@@ -122,7 +145,7 @@ function deleteCurrBook(e) {
             addForm.style.display = 'block';
             document.getElementById(`${currBookId}`).remove();
         })
-        .catch(err => console.log(err.message));
+        .catch(err => eventHandler(err));
 }
 
 function submitEdit(e) {
@@ -145,7 +168,14 @@ function submitEdit(e) {
             const bookToUpdate = tableEl.querySelector(`tr[id="${currBookId}"]`);
             bookToUpdate.innerHTML = createRow([currBookId, { title, author, isbn }]);
         })
-        .catch(err => console.log(err.message))
+        .catch(err => eventHandler(err))
     editForm.style.display = 'none';
     addForm.style.display = 'block';
+}
+
+function eventHandler(err) {
+    // e.preventDefault();
+    const bodyArh = bodyEl.innerHTML;
+    bodyEl.innerHTML = `<div id="err-text"><strong>${err.message}</strong></div>`;
+    setTimeout(() => bodyEl.innerHTML = `${bodyArh}`, 5000);
 }

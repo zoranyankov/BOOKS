@@ -55,10 +55,6 @@ table button:hover{
     text-decoration: underline;
 }
 
-button {
-    cursor: pointer;
-}
-
 button#loadBooks{
     margin: 0 auto;
     display:block;
@@ -95,4 +91,17 @@ form button{
     color:white;
     border: none;
     padding: 0.5%;
+}
+
+#err-text {
+    font-size: xx-large;
+    color: red;
+    border: 5px solid rebeccapurple;
+    border-radius: 10px;
+    text-align: center;
+    padding: 10px;
+}
+
+button {
+    cursor: pointer;
 }
